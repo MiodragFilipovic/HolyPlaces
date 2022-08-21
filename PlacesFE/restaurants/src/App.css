@@ -1,0 +1,12 @@
+
+body{
+  background: #011b28 !important;
+}
+
+.chakra-popover__popper{
+  min-width: 400px !important;
+}
+
+.chakra-popover__content{
+  width: 100% !important;
+}
