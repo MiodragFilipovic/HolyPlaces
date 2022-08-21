@@ -4,7 +4,7 @@ body{
 }
 
 .chakra-popover__popper{
-  min-width: 401px !important;
+  min-width: 400px !important;
 }
 
 .chakra-popover__content{
