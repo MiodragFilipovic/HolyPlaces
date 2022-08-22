@@ -66,10 +66,10 @@ export default function Restaurant({ restaurantData }) {
               .fill("")
               .map((_, i) => {
                 if (i <= restaurantData.feedback_summary.average_rating - 1) {
-                  return <Icon key={i} as={MdStar} color={"teal.500"} />;
+                  return <Icon key={i} as={MdStar} color={"yellow.300"} />;
                 } else {
                   if (restaurantData.feedback_summary.average_rating - i > 0) {
-                    return <Icon key={i} as={MdStarHalf} color={"teal.500"} />;
+                    return <Icon key={i} as={MdStarHalf} color={"yellow.300"} />;
                   } else {
                     return <Icon key={i} as={MdStar} color={"gray.500"} />;
                   }
