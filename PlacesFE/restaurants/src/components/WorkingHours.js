@@ -29,7 +29,7 @@ export default function WorkingHours({ restaurantData }) {
         <PopoverContent>
           <PopoverArrow />
           <PopoverCloseButton />
-          <PopoverHeader>Working hours</PopoverHeader>
+          <PopoverHeader>Opening hours</PopoverHeader>
           <PopoverBody>
             <Box>
               {restaurantData?.opening_hours.map((workingHour) => {
