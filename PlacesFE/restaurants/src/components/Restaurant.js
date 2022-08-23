@@ -27,6 +27,15 @@ export default function Restaurant({ restaurantData }) {
           {restaurantData?.displayed_what}
         </Box>
         <Box
+          mt="1"
+          fontWeight="semibold"
+          as="h4"
+          lineHeight="tight"
+          noOfLines={1}
+        >
+          {restaurantData?.is_open}
+        </Box>
+        <Box
           display="flex"
           flexDirection="row"
           alignItems="flex-end"

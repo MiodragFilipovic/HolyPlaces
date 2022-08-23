@@ -1,8 +1,10 @@
 package com.holycode.places.service.impl;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -35,20 +37,71 @@ public class PlaceServiceImpl implements PlacesService {
 		JSONObject openingHours = (JSONObject) placeJSON.get("opening_hours");
 		placeForUI.put("opening_hours", groupOpeningHours(openingHours));
 		placeForUI.put("categories", getCategories(placeJSON));
+		placeForUI.put("is_open", isOpen(openingHours) ? "open" : "closed");
+//		placeForUI.put("dateTime", getDayAndTime(openingHours));
 
 		return placeForUI;
 
 	}
 
+//	private LocalDateTime getDayAndTime(JSONObject openingHours) {
+//		LocalDateTime currentDateTime = LocalDateTime.now();
+//		boolean isOpen = isOpen(openingHours);
+//
+//		if (isOpen) {
+//			return getClosingDayAndTime(currentDateTime);
+//
+//		} else {
+//			return getOpeningDayAndTime(currentDateTime);
+//		}
+//
+//		return null;
+//	}
+//
+//	private LocalDateTime getOpeningDayAndTime(LocalDateTime currentDateTime, JSONObject openingHours) {
+//		WorkingSchedule ws = createWorkingSchedule(createDays(openingHours));
+//
+//		for (WorkingHourGroup whg : ws.getWorkingHourGroups()) {
+//
+//		}
+//
+//		return null;
+//	}
+//
+//	private LocalDateTime getClosingDayAndTime(LocalDateTime currentDateTime) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+	private boolean isOpen(JSONObject openingHours) {
+		WorkingSchedule ws = createWorkingSchedule(createDays(openingHours));
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		String dayOfWeek = currentDateTime.getDayOfWeek().toString();
+		LocalTime currentTime = currentDateTime.toLocalTime();
+
+		List<WorkingHour> workingHours = ws.getWorkingHourForDay(dayOfWeek);
+
+		return checkIfCurrentTimeIsInWorkingHours(currentTime, workingHours);
+	}
+
+	private boolean checkIfCurrentTimeIsInWorkingHours(LocalTime currentTime, List<WorkingHour> workingHours) {
+		for (WorkingHour workingHour : workingHours) {
+			if ((currentTime.isAfter(workingHour.getStartHour()) || currentTime.equals(workingHour.getStartHour()))
+					&& (currentTime.isBefore(workingHour.getEndHour())))
+				return true;
+		}
+		return false;
+	}
+
 	private JSONArray getCategories(JSONObject placeJSON) {
 		JSONArray addresses = (JSONArray) placeJSON.getJSONArray("addresses");
 		JSONArray categoriesJSON = new JSONArray();
-		
+
 		for (int i = 0; i < addresses.length(); i++) {
 			JSONObject address = addresses.getJSONObject(i);
 			JSONObject business = address.getJSONObject("business");
 			JSONArray categories = business.getJSONArray("categories");
-			
+
 			for (int j = 0; j < categories.length(); j++) {
 				JSONObject category = categories.getJSONObject(j);
 				String categoryName = (String) category.getJSONObject("name").get("en");
@@ -61,6 +114,11 @@ public class PlaceServiceImpl implements PlacesService {
 	}
 
 	private JSONArray groupOpeningHours(JSONObject openingHours) {
+		List<Day> days = createDays(openingHours);
+		return createScheduleJSON(createWorkingSchedule(days));
+	}
+
+	private List<Day> createDays(JSONObject openingHours) {
 		List<Day> days = new ArrayList<>();
 		Arrays.asList(Days.values()).forEach(day -> {
 			JSONArray daysJSON;
@@ -73,7 +131,7 @@ public class PlaceServiceImpl implements PlacesService {
 				days.add(workingDay);
 			}
 		});
-		return createWorkingSchedule(days);
+		return days;
 	}
 
 	private Day createWorkingDay(Days day, JSONArray daysJSON) {
@@ -95,7 +153,7 @@ public class PlaceServiceImpl implements PlacesService {
 		return workingDay;
 	}
 
-	private JSONArray createWorkingSchedule(List<Day> days) {
+	private WorkingSchedule createWorkingSchedule(List<Day> days) {
 		WorkingSchedule schedule = new WorkingSchedule();
 		WorkingHourGroup whg = new WorkingHourGroup(days.get(0).getDay().toString(), days.get(0).getWorkingHours());
 		for (int i = 0; i < days.size() - 1; i++) {
@@ -113,14 +171,14 @@ public class PlaceServiceImpl implements PlacesService {
 				}
 			}
 		}
-		JSONArray scheduleJSON = createScheduleJSON(schedule);
-		return scheduleJSON;
+		// JSONArray scheduleJSON = createScheduleJSON(schedule);
+		return schedule;
 	}
 
 	private JSONArray createScheduleJSON(WorkingSchedule schedule) {
 		JSONArray scheduleJSON = new JSONArray();
 		for (WorkingHourGroup workingHourGroup : schedule.getWorkingHourGroups()) {
-			workingHourGroup.trimInterval();
+			// workingHourGroup.trimInterval();
 			JSONObject workingHourGroupJSON = new JSONObject();
 			workingHourGroupJSON.put("interval", workingHourGroup.getInterval());
 			JSONArray workingHoursJSON = new JSONArray();

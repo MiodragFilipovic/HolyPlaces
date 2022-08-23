@@ -33,6 +33,13 @@ export default function WorkingHours({ restaurantData }) {
           <PopoverBody>
             <Box>
               {restaurantData?.opening_hours.map((workingHour) => {
+                const wh = workingHour.interval.split("-");
+                let sWH = "";
+                if(wh.length > 1) {
+                  sWH = wh[0] + "-" +wh[wh.length-1]
+                }else{
+                  sWH = wh[0];
+                }
                 return (
                   <Box
                     display="flex"
@@ -41,7 +48,7 @@ export default function WorkingHours({ restaurantData }) {
                   >
                     <Box m={2}>
                       <h3 style={{ textTransform: "uppercase" }}>
-                        {workingHour.interval}
+                        {sWH}
                       </h3>
                     </Box>
                     <Box display="flex">
